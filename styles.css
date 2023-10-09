@@ -1,0 +1,13 @@
+/* Centering styles */
+.center-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+}
+
+/* Styles for your RSS feed cards */
+.card-container {
+    /* Your existing styles for the card container */
+}
