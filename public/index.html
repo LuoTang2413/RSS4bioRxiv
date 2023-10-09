@@ -25,10 +25,12 @@
     </ul>
 
     <script>
-        // Fetch data from your Vercel serverless function
-        fetch('/api/biorxiv')
-            .then(response => response.json())
-            .then(data => {
+        // Function to fetch and display updates
+        async function fetchAndDisplayUpdates() {
+            try {
+                const response = await fetch('/api/biorxiv');
+                const data = await response.json();
+
                 const updateList = document.getElementById('updateList');
                 data.forEach(update => {
                     const listItem = document.createElement('li');
@@ -38,8 +40,13 @@
                     listItem.appendChild(titleLink);
                     updateList.appendChild(listItem);
                 });
-            })
-            .catch(error => console.error('Error fetching data:', error));
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Call the function to fetch and display updates when the page loads
+        window.onload = fetchAndDisplayUpdates;
     </script>
 </body>
 </html>
