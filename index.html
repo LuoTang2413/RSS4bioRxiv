@@ -14,19 +14,21 @@
         fetch('http://connect.biorxiv.org/biorxiv_xml.php?subject=all')
             .then(response => response.text())
             .then(data => {
-                // Parse the XML data (you may need a parser library)
-                // Create list items for each update and append them to the ul
-                // Example:
-                // const parser = new DOMParser();
-                // const xmlDoc = parser.parseFromString(data, 'text/xml');
-                // const entries = xmlDoc.getElementsByTagName('entry');
-                // entries.forEach(entry => {
-                //     const title = entry.getElementsByTagName('title')[0].textContent;
-                //     const link = entry.getElementsByTagName('link')[0].getAttribute('href');
-                //     const listItem = document.createElement('li');
-                //     listItem.innerHTML = `<a href="${link}">${title}</a>`;
-                //     document.getElementById('updateList').appendChild(listItem);
-                // });
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(data, 'text/xml');
+                const entries = xmlDoc.getElementsByTagName('entry');
+                const updateList = document.getElementById('updateList');
+
+                for (let i = 0; i < entries.length; i++) {
+                    const title = entries[i].getElementsByTagName('title')[0].textContent;
+                    const link = entries[i].getElementsByTagName('link')[0].getAttribute('href');
+                    const listItem = document.createElement('li');
+                    const anchor = document.createElement('a');
+                    anchor.href = link;
+                    anchor.textContent = title;
+                    listItem.appendChild(anchor);
+                    updateList.appendChild(listItem);
+                }
             })
             .catch(error => console.error('Error fetching data:', error));
     </script>
