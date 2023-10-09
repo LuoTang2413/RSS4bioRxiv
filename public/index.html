@@ -35,10 +35,7 @@
                     const titleLink = document.createElement('a');
                     titleLink.href = update.link;
                     titleLink.textContent = update.title;
-                    const summaryParagraph = document.createElement('p');
-                    summaryParagraph.textContent = update.summary;
                     listItem.appendChild(titleLink);
-                    listItem.appendChild(summaryParagraph);
                     updateList.appendChild(listItem);
                 });
             })
