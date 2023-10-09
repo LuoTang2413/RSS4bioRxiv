@@ -1,10 +1,12 @@
 /* Centering styles */
-.center-container {
+.center-content {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    height: 100vh; /* Full viewport height */
+    justify-content: center;
+    min-height: 100vh; /* Minimum viewport height */
+    margin: 0;
+    padding: 0;
 }
 
 /* Styles for your RSS feed cards */
