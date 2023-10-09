@@ -1,5 +1,3 @@
-const cheerio = require('cheerio'); // Import Cheerio library
-
 document.addEventListener('DOMContentLoaded', async function() {
     // Define the RSS feed URL for BioRxiv
     const bioRxivFeedURL = 'http://connect.biorxiv.org/biorxiv_xml.php?subject=all';
@@ -13,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const newsList = document.getElementById('newsList');
 
         // Iterate through the feed items
-        for (const item of data.items) {
+        data.items.forEach(item => {
             const card = document.createElement('div');
             card.classList.add('card');
 
@@ -33,38 +31,14 @@ document.addEventListener('DOMContentLoaded', async function() {
             readOriginalLink.href = item.link; // Set the link to the original article
             readOriginalLink.textContent = 'Read Original'; // Text for the link
 
-            // Fetch the content of the original article's webpage
-            const articleResponse = await fetch(item.link);
-            const articleHtml = await articleResponse.text();
-
-            // Use Cheerio to parse the article's HTML
-            const $ = cheerio.load(articleHtml);
-
-            // Find PDF links within the article's content
-            const pdfLinks = [];
-            $('a').each((index, element) => {
-                const href = $(element).attr('href');
-                if (href && href.toLowerCase().endsWith('.pdf')) {
-                    pdfLinks.push(href);
-                }
-            });
-
-            // Create "View PDF" links for each PDF found
-            pdfLinks.forEach(pdfLink => {
-                const pdfLinkElement = document.createElement('a');
-                pdfLinkElement.href = pdfLink;
-                pdfLinkElement.textContent = 'View PDF';
-                cardContent.appendChild(pdfLinkElement);
-            });
-
             cardContent.appendChild(title);
             cardContent.appendChild(author);
             cardContent.appendChild(summary);
-            cardContent.appendChild(readOriginalLink);
+            cardContent.appendChild(readOriginalLink); // Add the "Read Original" link
 
             card.appendChild(cardContent);
 
             newsList.appendChild(card);
-        }
+        });
     }
 });
