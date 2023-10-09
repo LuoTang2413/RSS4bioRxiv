@@ -1,44 +1,31 @@
-const axios = require('axios');
-const parseString = require('xml2js').parseString;
+// 定义订阅源的URL
+const rssFeedUrl = "http://connect.biorxiv.org/biorxiv_xml.php?subject=all";
 
-// bioRxiv RSS Feed URL
-const rssFeedUrl = 'http://connect.biorxiv.org/biorxiv_xml.php?subject=all';
+// 获取订阅源的数据
+fetch(rssFeedUrl)
+  .then((response) => response.text())
+  .then((xmlData) => {
+    // 解析XML数据
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlData, "text/xml");
 
-// 定期检查更新的间隔（毫秒）
-const checkInterval = 3600000; // 1小时
+    // 提取文章标题和链接
+    const items = xmlDoc.querySelectorAll("item");
+    const subscriptionList = document.getElementById("subscription-list");
 
-// 订阅更新并处理
-function subscribeToUpdates() {
-  axios.get(rssFeedUrl)
-    .then(response => {
-      if (response.status === 200) {
-        parseString(response.data, (err, result) => {
-          if (!err) {
-            // 解析XML数据
-            const feedEntries = result.feed.entry;
+    items.forEach((item) => {
+      const title = item.querySelector("title").textContent;
+      const link = item.querySelector("link").textContent;
 
-            // 处理每个条目
-            feedEntries.forEach(entry => {
-              const title = entry.title[0];
-              const link = entry.link[0].$.href;
-              const publishedDate = entry.published[0];
-              
-              // 在这里可以执行自定义操作，例如发送通知或保存到数据库
-              console.log(`New bioRxiv update: ${title}`);
-              console.log(`Link: ${link}`);
-              console.log(`Published Date: ${publishedDate}`);
-            });
-          }
-        });
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
+      // 创建列表项并添加到页面中
+      const listItem = document.createElement("li");
+      const linkElement = document.createElement("a");
+      linkElement.href = link;
+      linkElement.textContent = title;
+      listItem.appendChild(linkElement);
+      subscriptionList.appendChild(listItem);
     });
-}
-
-// 启动订阅更新
-subscribeToUpdates();
-
-// 每隔一段时间重新检查更新
-setInterval(subscribeToUpdates, checkInterval);
+  })
+  .catch((error) => {
+    console.error("获取订阅数据时出错：", error);
+  });
