@@ -1,48 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioRxiv Updates</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            text-align: center;
-        }
-        h1 {
-            color: #333;
-        }
-        ul {
-            list-style-type: disc;
-        }
-    </style>
-</head>
-<body>
-    <h1>BioRxiv Updates</h1>
-    <ul id="updateList">
-        <!-- Content will be dynamically added here using JavaScript -->
-    </ul>
+// api/biorxiv.js
 
-    <script>
-        // Fetch data from your Vercel serverless function
-        fetch('/api/biorxiv')
-            .then(response => response.json())
-            .then(data => {
-                const updateList = document.getElementById('updateList');
-                data.forEach(update => {
-                    const listItem = document.createElement('li');
-                    const titleLink = document.createElement('a');
-                    titleLink.href = update.link;
-                    titleLink.textContent = update.title;
-                    const summaryParagraph = document.createElement('p');
-                    summaryParagraph.textContent = update.summary;
-                    listItem.appendChild(titleLink);
-                    listItem.appendChild(summaryParagraph);
-                    updateList.appendChild(listItem);
-                });
-            })
-            .catch(error => console.error('Error fetching data:', error));
-    </script>
-</body>
-</html>
+const fetch = require('node-fetch');
+const parser = require('fast-xml-parser');
+
+module.exports = async (req, res) => {
+    try {
+        const response = await fetch('http://connect.biorxiv.org/biorxiv_xml.php?subject=all');
+        const xmlData = await response.text();
+
+        const options = {
+            attributeNamePrefix: '',
+            textNodeName: 'value',
+            ignoreAttributes: false,
+        };
+
+        const jsonData = parser.parse(xmlData, options);
+        const entries = jsonData.feed.entry;
+
+        const updates = entries.map(entry => ({
+            title: entry.title.value,
+            link: entry.link.href,
+            summary: entry.summary.value,
+        }));
+
+        res.status(200).json(updates);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error fetching data from BioRxiv' });
+    }
+};
