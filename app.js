@@ -27,14 +27,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             const summary = document.createElement('p');
             summary.textContent = item.description;
 
-            const readOriginalLink = document.createElement('a');
-            readOriginalLink.href = item.link; // Set the link to the original article
-            readOriginalLink.textContent = 'Read Original'; // Text for the link
-
             cardContent.appendChild(title);
             cardContent.appendChild(author);
             cardContent.appendChild(summary);
-            cardContent.appendChild(readOriginalLink); // Add the "Read Original" link
 
             card.appendChild(cardContent);
 
