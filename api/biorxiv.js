@@ -18,9 +18,8 @@ module.exports = async (req, res) => {
         const entries = jsonData.feed.entry;
 
         const updates = entries.map(entry => ({
-            title: entry.title.value,
-            link: entry.link.href,
-            summary: entry.summary.value,
+            title: entry.title,
+            link: entry.link,
         }));
 
         res.status(200).json(updates);
