@@ -1,31 +1,39 @@
-// api/biorxiv.js
+document.addEventListener('DOMContentLoaded', async function() {
+    // Define the RSS feed URL for BioRxiv
+    const bioRxivFeedURL = 'http://connect.biorxiv.org/biorxiv_xml.php?subject=all';
 
-const fetch = require('node-fetch');
-const parser = require('fast-xml-parser');
+    // Fetch and parse the RSS feed
+    const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${bioRxivFeedURL}`);
+    const data = await response.json();
 
-module.exports = async (req, res) => {
-    try {
-        const response = await fetch('http://connect.biorxiv.org/biorxiv_xml.php?subject=all');
-        const xmlData = await response.text();
+    // Check if data.items exists and is not empty
+    if (data && data.items) {
+        const newsList = document.getElementById('newsList');
 
-        const options = {
-            attributeNamePrefix: '',
-            textNodeName: 'value',
-            ignoreAttributes: false,
-        };
+        // Iterate through the feed items
+        data.items.forEach(item => {
+            const card = document.createElement('div');
+            card.classList.add('card');
 
-        const jsonData = parser.parse(xmlData, options);
-        const entries = jsonData.feed.entry;
+            const cardContent = document.createElement('div');
+            cardContent.classList.add('card-content');
 
-        const updates = entries.map(entry => ({
-            title: entry.title,
-            link: entry.link,
-        }));
+            const title = document.createElement('h2');
+            title.textContent = item.title;
 
-        res.setHeader('Access-Control-Allow-Origin', '*'); // Enable CORS (only for development, restrict in production)
-        res.status(200).json(updates);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error fetching data from BioRxiv' });
+            const author = document.createElement('p');
+            author.textContent = `Author: ${item.author}`;
+
+            const summary = document.createElement('p');
+            summary.textContent = item.description;
+
+            cardContent.appendChild(title);
+            cardContent.appendChild(author);
+            cardContent.appendChild(summary);
+
+            card.appendChild(cardContent);
+
+            newsList.appendChild(card);
+        });
     }
-};
+});
