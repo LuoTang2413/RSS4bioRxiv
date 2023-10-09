@@ -31,6 +31,14 @@ document.addEventListener('DOMContentLoaded', async function() {
             readOriginalLink.href = item.link; // Set the link to the original article
             readOriginalLink.textContent = 'Read Original'; // Text for the link
 
+            // Check if the item has a PDF link
+            if (item.link_pdf) {
+                const pdfLink = document.createElement('a');
+                pdfLink.href = item.link_pdf; // Set the link to the PDF
+                pdfLink.textContent = 'View PDF'; // Text for the PDF link
+                cardContent.appendChild(pdfLink); // Add the PDF link
+            }
+
             cardContent.appendChild(title);
             cardContent.appendChild(author);
             cardContent.appendChild(summary);
