@@ -1,36 +1,31 @@
-const express = require('express');
-const axios = require('axios');
-const xml2js = require('xml2js');
+// api/biorxiv.js
 
-const app = express();
-const port = 3000;
+const fetch = require('node-fetch');
+const parser = require('fast-xml-parser');
 
-app.get('/biorxiv-updates', async (req, res) => {
+module.exports = async (req, res) => {
     try {
-        // Fetch data from the BioRxiv XML feed
-        const response = await axios.get('http://connect.biorxiv.org/biorxiv_xml.php?subject=all');
-        const xmlData = response.data;
+        const response = await fetch('http://connect.biorxiv.org/biorxiv_xml.php?subject=all');
+        const xmlData = await response.text();
 
-        // Parse XML data to JSON
-        const parser = new xml2js.Parser();
-        parser.parseString(xmlData, (err, result) => {
-            if (err) {
-                res.status(500).json({ error: 'Error parsing XML data' });
-            } else {
-                const entries = result.feed.entry;
-                const updates = entries.map(entry => ({
-                    title: entry.title[0],
-                    link: entry.link[0].$.href,
-                    summary: entry.summary[0]._
-                }));
-                res.json(updates);
-            }
-        });
+        const options = {
+            attributeNamePrefix: '',
+            textNodeName: 'value',
+            ignoreAttributes: false,
+        };
+
+        const jsonData = parser.parse(xmlData, options);
+        const entries = jsonData.feed.entry;
+
+        const updates = entries.map(entry => ({
+            title: entry.title.value,
+            link: entry.link.href,
+            summary: entry.summary.value,
+        }));
+
+        res.status(200).json(updates);
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Error fetching data from BioRxiv' });
     }
-});
-
-app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
-});
+};
