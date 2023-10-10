@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', async function () {
     // Define the RSS feed URL for BioRxiv
     const bioRxivFeedURL = 'http://connect.biorxiv.org/biorxiv_xml.php?subject=all';
 
@@ -10,15 +10,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (data && data.items) {
         const newsList = document.getElementById('newsList');
 
-        // Iterate through the feed items
-        data.items.forEach(async item => {
-            const card = document.createElement('div');
-            card.classList.add('card');
-
-            const cardContent = document.createElement('div');
-            cardContent.classList.add('card-content');
-
-            // Fetch the dynamic original link to get detailed information
+        // Function to fetch detailed information and generate a card for each item
+        async function generateCard(item) {
             try {
                 const response = await fetch(item.link);
                 const html = await response.text();
@@ -34,8 +27,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 // Assuming the PDF download link is available as a separate field
                 const pdfDownloadLink = doc.querySelector('.pdf-download-link').href;
 
-                // Using template literals to generate HTML
-                cardContent.innerHTML = `
+                // Create card content using template literals
+                const cardContent = `
                     <h2>${title}</h2>
                     <p>Author(s): ${author}</p>
                     <p>DOI: ${doi}</p>
@@ -45,10 +38,25 @@ document.addEventListener('DOMContentLoaded', async function() {
                     <a href="${pdfDownloadLink}">Download PDF</a>
                 `;
 
-                card.appendChild(cardContent);
-                newsList.appendChild(card);
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.innerHTML = cardContent;
+
+                return card;
             } catch (error) {
                 console.error('Error fetching dynamic content:', error);
+                return null;
+            }
+        }
+
+        // Fetch detailed information and generate cards for all items in parallel
+        const cardsPromises = data.items.map(generateCard);
+        const cards = await Promise.all(cardsPromises);
+
+        // Append cards to the newsList
+        cards.forEach(card => {
+            if (card) {
+                newsList.appendChild(card);
             }
         });
     }
