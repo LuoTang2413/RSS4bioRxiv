@@ -2,18 +2,32 @@
 
 // ... (previous code)
 
-// Function to fetch and display RSS data
-const fetchAndDisplayRss = async (targetElementId) => {
+// Modify the fetchAndParseRss function to include additional information
+const fetchAndParseRss = async () => {
   try {
-    const rssData = await fetchAndParseRss();
+    const response = await fetch(rssUrl);
+    const xmlData = await response.text();
 
-    // Build HTML to display RSS data
-    const html = `<ul>${rssData.map(item => `<li><a href="${item.link}">${item.title}</a> - ${item.date}</li>`).join('')}</ul>`;
+    // Parse XML data
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlData, 'text/xml');
 
-    // Display the HTML content in the specified element
-    document.getElementById(targetElementId).innerHTML = html;
+    // Extract information including title, link, date, summary, and author
+    const items = xmlDoc.querySelectorAll('item');
+    const data = Array.from(items).map(item => {
+      return {
+        title: item.querySelector('title').textContent,
+        link: item.querySelector('link').textContent,
+        date: item.querySelector('pubDate').textContent,
+        summary: item.querySelector('description').textContent,
+        author: item.querySelector('author').textContent
+      };
+    });
+
+    return data;
   } catch (error) {
     console.error('Error fetching or parsing RSS data:', error);
+    throw error;
   }
 };
 
