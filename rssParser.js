@@ -2,32 +2,25 @@
 
 // ... (previous code)
 
-// Modify the fetchAndParseRss function to include additional information
-const fetchAndParseRss = async () => {
+// Function to fetch and display RSS data
+const fetchAndDisplayRss = async (targetElementId) => {
   try {
-    const response = await fetch(rssUrl);
-    const xmlData = await response.text();
+    const rssData = await fetchAndParseRss();
 
-    // Parse XML data
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlData, 'text/xml');
-
-    // Extract information including title, link, date, summary, and author
-    const items = xmlDoc.querySelectorAll('item');
-    const data = Array.from(items).map(item => {
-      return {
-        title: item.querySelector('title').textContent,
-        link: item.querySelector('link').textContent,
-        date: item.querySelector('pubDate').textContent,
-        summary: item.querySelector('description').textContent,
-        author: item.querySelector('dc\\:creator').textContent  // Use the appropriate tag for author
-      };
+    // Build HTML to display RSS data
+    const rssList = document.getElementById(targetElementId);
+    rssData.forEach(item => {
+      const listItem = document.createElement('li');
+      listItem.innerHTML = `
+        <h2><a href="${item.link}" target="_blank">${item.title}</a></h2>
+        <p><strong>Author:</strong> ${item.author}</p>
+        <p><strong>Date:</strong> ${item.date}</p>
+        <p><strong>Summary:</strong> ${item.summary}</p>
+      `;
+      rssList.appendChild(listItem);
     });
-
-    return data;
   } catch (error) {
     console.error('Error fetching or parsing RSS data:', error);
-    throw error;
   }
 };
 
