@@ -22,19 +22,35 @@ document.addEventListener('DOMContentLoaded', async function() {
             title.textContent = item.title;
 
             const author = document.createElement('p');
-            author.textContent = `Author: ${item.author}`;
+            author.textContent = `Author(s): ${item.creator}`;
+
+            const doi = document.createElement('p');
+            doi.textContent = `DOI: ${item.identifier}`;
 
             const summary = document.createElement('p');
             summary.textContent = item.description;
+
+            const pubDate = document.createElement('p');
+            pubDate.textContent = `Published Date: ${item.date}`;
 
             const readOriginalLink = document.createElement('a');
             readOriginalLink.href = item.link; // Set the link to the original article
             readOriginalLink.textContent = 'Read Original'; // Text for the link
 
+            // Construct the PDF download link based on the original link (assuming it's a common pattern)
+            const pdfDownloadLink = `${item.link.replace('/cgi/content/short/', '/content/')}.full.pdf`;
+
+            const pdfLink = document.createElement('a');
+            pdfLink.href = pdfDownloadLink;
+            pdfLink.textContent = 'Download PDF';
+
             cardContent.appendChild(title);
             cardContent.appendChild(author);
+            cardContent.appendChild(doi);
             cardContent.appendChild(summary);
-            cardContent.appendChild(readOriginalLink); // Add the "Read Original" link
+            cardContent.appendChild(pubDate);
+            cardContent.appendChild(readOriginalLink);
+            cardContent.appendChild(pdfLink); // Add the PDF download link
 
             card.appendChild(cardContent);
 
