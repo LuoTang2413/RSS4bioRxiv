@@ -1,48 +1,31 @@
 import feedparser
-import requests
-from bs4 import BeautifulSoup
 
-# RSS地址
-rss_url = 'http://connect.biorxiv.org/biorxiv_xml.php?subject=all'
+# 解析新的RSS源
+new_rss_url = 'http://new-rss-source.com/feed.xml'
+feed = feedparser.parse(new_rss_url)
 
-# 解析RSS
-feed = feedparser.parse(rss_url)
+# 获取需要的数据（示例中仅获取第一条数据）
+if len(feed.entries) > 0:
+    entry = feed.entries[0]
+    title = entry.title
+    author = entry.author
+    doi = entry.doi
+    abstract = entry.abstract
+    pub_date = entry.published
 
-# 遍历每个条目的动态链接
-for entry in feed.entries:
-    dynamic_link = entry.link  # 获取动态链接
-    
-    # 发送HTTP请求获取动态链接的网页内容
-    response = requests.get(dynamic_link)
-    
-    if response.status_code == 200:
-        # 使用Beautiful Soup解析HTML内容
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # 提取原文标题
-        title = soup.find('h1').text.strip()
-        print('原文标题:', title)
-        
-        # 提取作者（示例中假设作者在<span>标签中）
-        authors = soup.find_all('span', class_='author-name')
-        author_names = [author.text.strip() for author in authors]
-        print('作者:', ', '.join(author_names))
-        
-        # 提取DOI（示例中假设DOI在<meta>标签中的属性中）
-        doi_element = soup.find('meta', attrs={'name': 'citation_doi'})
-        doi = doi_element.get('content') if doi_element else 'N/A'
-        print('DOI:', doi)
-        
-        # 提取摘要（示例中假设摘要在<div>标签中）
-        abstract_element = soup.find('div', class_='abstract')
-        abstract = abstract_element.text.strip() if abstract_element else 'N/A'
-        print('摘要:', abstract)
-        
-        # 提取发布时间（示例中假设发布时间在<meta>标签中的属性中）
-        pub_date_element = soup.find('meta', attrs={'name': 'citation_publication_date'})
-        pub_date = pub_date_element.get('content') if pub_date_element else 'N/A'
-        print('发布时间:', pub_date)
-        
-        print('---')
-    else:
-        print(f'无法访问动态链接: {dynamic_link}')
+    # 读取现有的index.html内容
+    with open('index.html', 'r') as file:
+        html_content = file.read()
+
+    # 替换HTML内容中的相应标记，将新的数据插入
+    html_content = html_content.replace('{{Title}}', title)
+    html_content = html_content.replace('{{Author}}', author)
+    html_content = html_content.replace('{{DOI}}', doi)
+    html_content = html_content.replace('{{Abstract}}', abstract)
+    html_content = html_content.replace('{{PubDate}}', pub_date)
+
+    # 保存更新后的index.html
+    with open('index.html', 'w') as file:
+        file.write(html_content)
+else:
+    print('没有找到新的RSS数据。')
