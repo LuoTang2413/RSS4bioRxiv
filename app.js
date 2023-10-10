@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const newsList = document.getElementById('newsList');
 
         // Iterate through the feed items
-        data.items.forEach(item => {
+        data.items.forEach(async item => {
             const card = document.createElement('div');
             card.classList.add('card');
 
@@ -19,59 +19,37 @@ document.addEventListener('DOMContentLoaded', async function() {
             cardContent.classList.add('card-content');
 
             // Fetch the dynamic original link to get detailed information
-            fetch(item.link)
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
+            try {
+                const response = await fetch(item.link);
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
 
-                    const title = doc.querySelector('.article-header h1').textContent;
-                    const author = doc.querySelector('.author-list').textContent;
-                    const doi = doc.querySelector('.doi').textContent;
-                    const summary = doc.querySelector('.abstract-content').textContent;
-                    const pubDate = doc.querySelector('.pub-date').textContent;
+                const title = doc.querySelector('.article-header h1').textContent;
+                const author = doc.querySelector('.author-list').textContent;
+                const doi = doc.querySelector('.doi').textContent;
+                const summary = doc.querySelector('.abstract-content').textContent;
+                const pubDate = doc.querySelector('.pub-date').textContent;
 
-                    // Assuming the PDF download link is available as a separate field
-                    const pdfDownloadLink = doc.querySelector('.pdf-download-link').href;
+                // Assuming the PDF download link is available as a separate field
+                const pdfDownloadLink = doc.querySelector('.pdf-download-link').href;
 
-                    const titleElement = document.createElement('h2');
-                    titleElement.textContent = title;
+                // Using template literals to generate HTML
+                cardContent.innerHTML = `
+                    <h2>${title}</h2>
+                    <p>Author(s): ${author}</p>
+                    <p>DOI: ${doi}</p>
+                    <p>${summary}</p>
+                    <p>Published Date: ${pubDate}</p>
+                    <a href="${item.link}">Read Original</a>
+                    <a href="${pdfDownloadLink}">Download PDF</a>
+                `;
 
-                    const authorElement = document.createElement('p');
-                    authorElement.textContent = `Author(s): ${author}`;
-
-                    const doiElement = document.createElement('p');
-                    doiElement.textContent = `DOI: ${doi}`;
-
-                    const summaryElement = document.createElement('p');
-                    summaryElement.textContent = summary;
-
-                    const pubDateElement = document.createElement('p');
-                    pubDateElement.textContent = `Published Date: ${pubDate}`;
-
-                    const readOriginalLink = document.createElement('a');
-                    readOriginalLink.href = item.link; // Set the link to the original article
-                    readOriginalLink.textContent = 'Read Original'; // Text for the link
-
-                    const pdfLink = document.createElement('a');
-                    pdfLink.href = pdfDownloadLink;
-                    pdfLink.textContent = 'Download PDF';
-
-                    cardContent.appendChild(titleElement);
-                    cardContent.appendChild(authorElement);
-                    cardContent.appendChild(doiElement);
-                    cardContent.appendChild(summaryElement);
-                    cardContent.appendChild(pubDateElement);
-                    cardContent.appendChild(readOriginalLink);
-                    cardContent.appendChild(pdfLink); // Add the PDF download link
-
-                    card.appendChild(cardContent);
-
-                    newsList.appendChild(card);
-                })
-                .catch(error => {
-                    console.error('Error fetching dynamic content:', error);
-                });
+                card.appendChild(cardContent);
+                newsList.appendChild(card);
+            } catch (error) {
+                console.error('Error fetching dynamic content:', error);
+            }
         });
     }
 });
