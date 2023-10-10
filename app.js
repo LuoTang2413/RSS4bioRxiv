@@ -18,43 +18,60 @@ document.addEventListener('DOMContentLoaded', async function() {
             const cardContent = document.createElement('div');
             cardContent.classList.add('card-content');
 
-            const title = document.createElement('h2');
-            title.textContent = item.title;
+            // Fetch the dynamic original link to get detailed information
+            fetch(item.link)
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
 
-            const author = document.createElement('p');
-            author.textContent = `Author(s): ${item.creator}`;
+                    const title = doc.querySelector('.article-header h1').textContent;
+                    const author = doc.querySelector('.author-list').textContent;
+                    const doi = doc.querySelector('.doi').textContent;
+                    const summary = doc.querySelector('.abstract-content').textContent;
+                    const pubDate = doc.querySelector('.pub-date').textContent;
 
-            const doi = document.createElement('p');
-            doi.textContent = `DOI: ${item.identifier}`;
+                    // Assuming the PDF download link is available as a separate field
+                    const pdfDownloadLink = doc.querySelector('.pdf-download-link').href;
 
-            const summary = document.createElement('p');
-            summary.textContent = item.description;
+                    const titleElement = document.createElement('h2');
+                    titleElement.textContent = title;
 
-            const pubDate = document.createElement('p');
-            pubDate.textContent = `Published Date: ${item.date}`;
+                    const authorElement = document.createElement('p');
+                    authorElement.textContent = `Author(s): ${author}`;
 
-            const readOriginalLink = document.createElement('a');
-            readOriginalLink.href = item.link; // Set the link to the original article
-            readOriginalLink.textContent = 'Read Original'; // Text for the link
+                    const doiElement = document.createElement('p');
+                    doiElement.textContent = `DOI: ${doi}`;
 
-            // Construct the PDF download link based on the original link (assuming it's a common pattern)
-            const pdfDownloadLink = `${item.link.replace('/cgi/content/short/', '/content/')}.full.pdf`;
+                    const summaryElement = document.createElement('p');
+                    summaryElement.textContent = summary;
 
-            const pdfLink = document.createElement('a');
-            pdfLink.href = pdfDownloadLink;
-            pdfLink.textContent = 'Download PDF';
+                    const pubDateElement = document.createElement('p');
+                    pubDateElement.textContent = `Published Date: ${pubDate}`;
 
-            cardContent.appendChild(title);
-            cardContent.appendChild(author);
-            cardContent.appendChild(doi);
-            cardContent.appendChild(summary);
-            cardContent.appendChild(pubDate);
-            cardContent.appendChild(readOriginalLink);
-            cardContent.appendChild(pdfLink); // Add the PDF download link
+                    const readOriginalLink = document.createElement('a');
+                    readOriginalLink.href = item.link; // Set the link to the original article
+                    readOriginalLink.textContent = 'Read Original'; // Text for the link
 
-            card.appendChild(cardContent);
+                    const pdfLink = document.createElement('a');
+                    pdfLink.href = pdfDownloadLink;
+                    pdfLink.textContent = 'Download PDF';
 
-            newsList.appendChild(card);
+                    cardContent.appendChild(titleElement);
+                    cardContent.appendChild(authorElement);
+                    cardContent.appendChild(doiElement);
+                    cardContent.appendChild(summaryElement);
+                    cardContent.appendChild(pubDateElement);
+                    cardContent.appendChild(readOriginalLink);
+                    cardContent.appendChild(pdfLink); // Add the PDF download link
+
+                    card.appendChild(cardContent);
+
+                    newsList.appendChild(card);
+                })
+                .catch(error => {
+                    console.error('Error fetching dynamic content:', error);
+                });
         });
     }
 });
