@@ -2,19 +2,17 @@
   "version": 2,
   "builds": [
     {
-      "src": "index.html",
-      "use": "@vercel/static-build",
-      "config": {}
+      "src": "rss_parser.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "rss_parser.py"
     }
   ],
   "env": {
-    "YOUR_ENV_VARIABLE": "YOUR_ENV_VALUE"
-    // 如果需要设置环境变量，可以在这里添加
+    "RSS_URL": "http://connect.biorxiv.org/biorxiv_xml.php?subject=all"
   }
 }
