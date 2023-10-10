@@ -20,7 +20,7 @@ const fetchAndParseRss = async () => {
         link: item.querySelector('link').textContent,
         date: item.querySelector('pubDate').textContent,
         summary: item.querySelector('description').textContent,
-        author: item.querySelector('author').textContent
+        author: item.querySelector('dc\\:creator').textContent  // Use the appropriate tag for author
       };
     });
 
